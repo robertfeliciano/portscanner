@@ -1,7 +1,7 @@
-GCC=g++
+GCC=gcc
 CFLAGS=-lpthread -Wall
 
-all: pscan
+all:
 	$(GCC) $(CFLAGS) pscan.c -o pscan
 
 clean:

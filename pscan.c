@@ -1,8 +1,8 @@
 /* a multithreaded C program to check for open ports on Linux machines. */
 
 #include <stdio.h>
-#include <sys/socket.h>
 #include <netdb.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
@@ -15,24 +15,35 @@ void help(){
     "  '-h' - Display this help message\n");
 }
 
-void system_ports(){
-    printf("Checking system ports...\n");
-    short start = 0, end = 1023;
-}
+void init_threads(int flag){
+    int start, end;
+    switch(flag){
+        case 's':
+            start = 0;
+            end = 1023;
+            break;
+        case 'u':
+            start = 1024;
+            end = 49151;
+            break;
+        case 'p':
+            start = 49152;
+            end = 65535;
+            break;
+        case 'a':
+            start = 0;
+            end = 65535;
+            break;
+    }
+    //printf("start: %d\nend: %d\n", start, end);
+    struct hostent* server = gethostbyname("localhost");
+    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    bcopy((char*) server->h_addr,
+          (char*) &server_addr.sin_addr.s_addr,
+          server->h_length);
 
-void user_ports(){
-    printf("Checking user ports...\n");
-    short start = 1024, end = 49151;
-}
-
-void private_ports(){
-    printf("Checking private ports...\n");
-    short start = 49152, end = 65535;
-}
-
-void all_ports(){
-    printf("Checking all ports...\n");
-    short start = 0, end = 65535;
 }
 
 int main(int argc, char* argv[]){
@@ -40,22 +51,22 @@ int main(int argc, char* argv[]){
         help();
         return 1;
     }
-    int flag;
+    char flag;
     int c;
 
     while((c = getopt(argc, argv, "supah")) != -1){
         switch (c){
             case 's':
-                system_ports();
+                flag = c;
                 break;
             case 'u':
-                user_ports();
+                flag = c;
                 break;
             case 'p':
-                private_ports();
+                flag = c;
                 break;
             case 'a':
-                all_ports();
+                flag = c;
                 break;
             case 'h':
             case '?':
@@ -64,5 +75,6 @@ int main(int argc, char* argv[]){
                 return 1;
         }
     }
-
+    init_threads(flag);
+    return 0;
 }
