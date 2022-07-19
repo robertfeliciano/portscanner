@@ -1,3 +1,5 @@
+/* a multithreaded C program to check for open ports on Linux machines. */
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -13,6 +15,26 @@ void help(){
     "  '-h' - Display this help message\n");
 }
 
+void system_ports(){
+    printf("Checking system ports...\n");
+    short start = 0, end = 1023;
+}
+
+void user_ports(){
+    printf("Checking user ports...\n");
+    short start = 1024, end = 49151;
+}
+
+void private_ports(){
+    printf("Checking private ports...\n");
+    short start = 49152, end = 65535;
+}
+
+void all_ports(){
+    printf("Checking all ports...\n");
+    short start = 0, end = 65535;
+}
+
 int main(int argc, char* argv[]){
     if (argc == 1){
         help();
@@ -24,20 +46,16 @@ int main(int argc, char* argv[]){
     while((c = getopt(argc, argv, "supah")) != -1){
         switch (c){
             case 's':
-                flag = 1;
-                printf("s\n");
+                system_ports();
                 break;
             case 'u':
-                flag = 2;
-                printf("u\n");
+                user_ports();
                 break;
             case 'p':
-                flag = 3;
-                printf("p\n");
+                private_ports();
                 break;
             case 'a':
-                flag = 4;
-                printf("a\n");
+                all_ports();
                 break;
             case 'h':
             case '?':
@@ -46,4 +64,5 @@ int main(int argc, char* argv[]){
                 return 1;
         }
     }
+
 }
