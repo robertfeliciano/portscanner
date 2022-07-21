@@ -1,10 +1,12 @@
 /* a multithreaded C program to check for open ports on Linux machines. */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 
 void help(){
     printf("Please specify a flag:\n"
@@ -16,7 +18,9 @@ void help(){
 }
 
 void init_threads(int flag){
-    int start, end;
+    int start, end, sockfd;
+    struct sockaddr_in tower;
+    socklen_t addr_size = sizeof(struct sockaddr_in);
     switch(flag){
         case 's':
             start = 0;
@@ -36,14 +40,28 @@ void init_threads(int flag){
             break;
     }
     //printf("start: %d\nend: %d\n", start, end);
-    struct hostent* server = gethostbyname("localhost");
-    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    bcopy((char*) server->h_addr,
-          (char*) &server_addr.sin_addr.s_addr,
-          server->h_length);
+    //localhost is 127.0.0.1
+    if (inet_pton(AF_INET, "127.0.0.1", &tower.sin_addr) < 1){
+        fprintf(stderr, "Problem loading your IP address\n");
+        exit(EXIT_FAILURE);
+    }
+    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+        fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
+        exit(EXIT_FAILURE);
+    }
+    memset(&tower, 0, sizeof(tower));
+    tower.sin_family = AF_INET;
+    tower.sin_port = htons(25555);
+    tower.sin_addr.s_addr = inet_addr("127.0.0.1");
 
+
+    if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) < 0){
+        fprintf(stderr, "port is closed\n");
+    }
+    else{
+        printf("port is open\n");
+    }
+    close(sockfd);
 }
 
 int main(int argc, char* argv[]){
