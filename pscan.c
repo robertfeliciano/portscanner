@@ -8,6 +8,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#define MAX_THREADS 4
+
 struct port_args {
     int start;
     int end;
@@ -25,11 +27,12 @@ void help(){
 }
 
 void* count_open_ports(void* args){
-    struct port_args* pa = args;
+    struct port_args* pa = (struct port_args*) args;
     int start = pa->start;
     int end = pa->end;
     int sockfd = pa->sockfd;
     struct sockaddr_in* tower = pa->tower;
+    puts("\0");
     printf("start: %d\n", start);
     pthread_exit(NULL);
 }
@@ -76,20 +79,24 @@ void init_threads(int flag){
         }
         close(sockfd);
     }
-
-    /* pthread_t p = 0;
-    struct port_args* pa;
-    memset(pa, 0, sizeof(*pa));
-    pa->start = start;
-    pa->end = end;
-    pa->tower = &tower;
-    pa->sockfd = sockfd;
-    pthread_create(&p, NULL, count_open_ports, (void*) pa);
-    close(sockfd); */
+    pthread_t p = 0;
+    struct port_args pa;
+    memset(&pa, 0, sizeof(pa));
+    pa.start = start;
+    pa.end = end;
+    pa.tower = &tower;
+    pa.sockfd = sockfd;
+    pthread_create(&p, NULL, count_open_ports, (void*) &pa);
+    close(sockfd);
 }
 
 int main(int argc, char* argv[]){
     if (argc == 1){
+        help();
+        return 1;
+    }
+    if (strcmp(argv[1], "-") == 0){
+        printf("I think you made a typo.\n");
         help();
         return 1;
     }
