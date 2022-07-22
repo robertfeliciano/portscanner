@@ -3,10 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <netdb.h>
+#include <pthread.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
+struct port_args {
+    int start;
+    int end;
+    int sockfd;
+    struct sockaddr_in* tower;
+};
 
 void help(){
     printf("Please specify a flag:\n"
@@ -17,10 +24,19 @@ void help(){
     "  '-h' - Display this help message\n");
 }
 
+void* count_open_ports(void* args){
+    struct port_args* pa = args;
+    int start = pa->start;
+    int end = pa->end;
+    int sockfd = pa->sockfd;
+    struct sockaddr_in* tower = pa->tower;
+    printf("start: %d\n", start);
+    pthread_exit(NULL);
+}
+
 void init_threads(int flag){
     int start, end, sockfd;
     struct sockaddr_in tower;
-    socklen_t addr_size = sizeof(struct sockaddr_in);
     switch(flag){
         case 's':
             start = 0;
@@ -45,23 +61,48 @@ void init_threads(int flag){
         fprintf(stderr, "Problem loading your IP address\n");
         exit(EXIT_FAILURE);
     }
-    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
-        fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
-        exit(EXIT_FAILURE);
-    }
     memset(&tower, 0, sizeof(tower));
     tower.sin_family = AF_INET;
-    tower.sin_port = htons(25555);
     tower.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-
+    for (int i = start; i <= end; i++){
+        if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+            fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
+            close(sockfd);
+            exit(EXIT_FAILURE);
+        }
+        tower.sin_port = htons(i);
+        if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) < 0){
+            //fprintf(stderr, "port %d is closed\n", i);
+        }
+        else{
+            printf("port %d is open\n", i);
+        }
+        close(sockfd);
+    }
+    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+            fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
+            exit(EXIT_FAILURE);
+    }
+    tower.sin_port = htons(65535);
+    printf("\n\n\n\n\n\n");
     if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) < 0){
-        fprintf(stderr, "port is closed\n");
+            fprintf(stderr, "port %d is closed\n", start);
     }
     else{
-        printf("port is open\n");
+        printf("port %d is open\n", start);
     }
     close(sockfd);
+
+    /* pthread_t p = 0;
+    struct port_args* pa;
+    memset(pa, 0, sizeof(*pa));
+    pa->start = start;
+    pa->end = end;
+    pa->tower = &tower;
+    pa->sockfd = sockfd;
+    pthread_create(&p, NULL, count_open_ports, (void*) pa);
+    close(sockfd); */
 }
 
 int main(int argc, char* argv[]){

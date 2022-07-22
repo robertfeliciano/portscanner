@@ -2,7 +2,7 @@ GCC=gcc
 CFLAGS=-lpthread -Wall
 
 all:
-	$(GCC) $(CFLAGS) pscan.c -o pscan
+	$(GCC) pscan.c -o pscan $(CFLAGS)
 
 clean:
 	rm pscan
