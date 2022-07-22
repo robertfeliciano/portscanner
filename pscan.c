@@ -55,8 +55,7 @@ void init_threads(int flag){
             end = 65535;
             break;
     }
-    //printf("start: %d\nend: %d\n", start, end);
-    //localhost is 127.0.0.1
+    //localhost is 127.0.0.1 (hopefully)
     if (inet_pton(AF_INET, "127.0.0.1", &tower.sin_addr) < 1){
         fprintf(stderr, "Problem loading your IP address\n");
         exit(EXIT_FAILURE);
@@ -66,33 +65,17 @@ void init_threads(int flag){
     tower.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     for (int i = start; i <= end; i++){
+        tower.sin_port = htons(i);
         if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
             fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
             close(sockfd);
             exit(EXIT_FAILURE);
         }
-        tower.sin_port = htons(i);
-        if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) < 0){
-            //fprintf(stderr, "port %d is closed\n", i);
-        }
-        else{
+        if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) == 0){
             printf("port %d is open\n", i);
         }
         close(sockfd);
     }
-    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
-            fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
-            exit(EXIT_FAILURE);
-    }
-    tower.sin_port = htons(65535);
-    printf("\n\n\n\n\n\n");
-    if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) < 0){
-            fprintf(stderr, "port %d is closed\n", start);
-    }
-    else{
-        printf("port %d is open\n", start);
-    }
-    close(sockfd);
 
     /* pthread_t p = 0;
     struct port_args* pa;
