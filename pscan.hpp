@@ -7,6 +7,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include <unordered_map>
+#include <iostream>
+
 #define MAX_THREADS 4
 
 struct port_args {
@@ -16,3 +19,6 @@ struct port_args {
     struct sockaddr_in* tower;
 };
 
+std::unordered_map<int, std::string> ports = {
+    {631, "This port is used for printer driver software so it is usually always on."},
+};

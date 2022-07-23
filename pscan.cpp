@@ -1,7 +1,7 @@
 /* a multithreaded C program to check for open ports on Linux machines. */
+
 #include "pscan.hpp"
 
-using namespace std;
 
 void help(){
     printf("Please specify a flag:\n"
@@ -18,32 +18,14 @@ void* count_open_ports(void* args){
     int end = pa->end;
     int sockfd = pa->sockfd;
     struct sockaddr_in* tower = pa->tower;
-    puts("\0");
-    printf("start: %d\n", start);
+    std::cout << start << std::endl;
     pthread_exit(NULL);
 }
 
-void init_threads(int flag){
-    int start, end, sockfd;
+void init_threads(int flag, int start, int end){
+    int sockfd;
     struct sockaddr_in tower;
-    switch(flag){
-        case 's':
-            start = 0;
-            end = 1023;
-            break;
-        case 'u':
-            start = 1024;
-            end = 49151;
-            break;
-        case 'p':
-            start = 49152;
-            end = 65535;
-            break;
-        case 'a':
-            start = 0;
-            end = 65535;
-            break;
-    }
+
     //localhost is 127.0.0.1 (hopefully)
     if (inet_pton(AF_INET, "127.0.0.1", &tower.sin_addr) < 1){
         fprintf(stderr, "Problem loading your IP address\n");
@@ -87,29 +69,39 @@ int main(int argc, char* argv[]){
         return 1;
     }
     char flag;
-    int c;
+    int c, start, end;
 
     while((c = getopt(argc, argv, "supah")) != -1){
         switch (c){
             case 's':
                 flag = c;
+                start = 0;
+                end = 1023;
+                init_threads(flag, start, end);
                 break;
             case 'u':
                 flag = c;
+                start = 1024;
+                end = 49151;
+                init_threads(flag, start, end);
                 break;
             case 'p':
                 flag = c;
+                start = 49152;
+                end = 65535;
+                init_threads(flag, start, end);
                 break;
             case 'a':
                 flag = c;
+                start = 0;
+                end = 65535;
+                init_threads(flag, start, end);
                 break;
             case 'h':
-            case '?':
             default:
                 help();
                 return 1;
         }
     }
-    init_threads(flag);
     return 0;
 }
