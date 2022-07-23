@@ -1,5 +1,5 @@
 /* a multithreaded C program to check for open ports on Linux machines. */
-#include "pscan.h"
+#include "pscan.hpp"
 
 using namespace std;
 
