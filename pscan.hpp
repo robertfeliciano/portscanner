@@ -12,6 +12,11 @@
 
 #define MAX_THREADS 4
 
+using std::cout;
+using std::endl;
+using std::unordered_map;
+using std::string;
+
 struct port_args {
     int start;
     int end;
@@ -19,6 +24,6 @@ struct port_args {
     struct sockaddr_in* tower;
 };
 
-std::unordered_map<int, std::string> ports = {
+unordered_map<int, string> ports = {
     {631, "This port is used for printer driver software so it is usually always on."},
 };
