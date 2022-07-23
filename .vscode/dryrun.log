@@ -1,0 +1,5 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/robert/c/portscanner'
+g++ pscan.cpp -o pscan -pthread -Wall
+make: Leaving directory '/home/robert/c/portscanner'
+ 
