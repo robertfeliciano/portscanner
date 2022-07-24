@@ -12,17 +12,7 @@ void help(){
     "  '-h' - Display this help message\n");
 }
 
-void* count_open_ports(void* args){
-    struct port_args* pa = (struct port_args*) args;
-    int start = pa->start;
-    int end = pa->end;
-    int sockfd = pa->sockfd;
-    struct sockaddr_in* tower = pa->tower;
-    printf("start: %d\n", start);
-    pthread_exit(NULL);
-}
-
-void init_threads(int flag, int start, int end){
+void count_open_ports(int start, int end){
     int sockfd;
     struct sockaddr_in tower;
 
@@ -36,27 +26,44 @@ void init_threads(int flag, int start, int end){
     tower.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     for (int i = start; i <= end; i++){
+        //lock_guard<mutex> guard(tower_socket_mtx);
         tower.sin_port = htons(i);
         if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
             fprintf(stderr, "Error: Failed to create socket.\nPlease try again\n");
             close(sockfd);
-            exit(EXIT_FAILURE);
+            i--;
+            continue;
         }
         if (connect(sockfd, (struct sockaddr*) &tower, sizeof(tower)) == 0){
-            printf("port %d is open\n", i);
+            //cout << std::setw(11);
+            //printf("port %d is open\n", i);
+            cout << "port " << i << " is open\n";
         }
         close(sockfd);
     }
-    pthread_t p = 0;
-    struct port_args pa;
-    memset(&pa, 0, sizeof(pa));
-    pa.start = start;
-    pa.end = end;
-    pa.tower = &tower;
-    pa.sockfd = sockfd;
-    pthread_create(&p, NULL, count_open_ports, (void*) &pa);
-    pthread_join(p, NULL);
-    close(sockfd);
+}
+
+void thread_handler(int start, int end){
+    int max_threads = thread::hardware_concurrency();
+    thread thread_list[max_threads];
+    int interval_size = (end - start + 1)/max_threads;
+    int thread_num = 0;
+
+    //create all the threads
+    for (; thread_num < max_threads; thread_num++){
+        int right_bound = start + interval_size;
+        thread_list[thread_num] = thread(count_open_ports, start, right_bound);
+        start = right_bound + 1;
+    }
+    //round up all the threads
+    for (thread_num = 0; thread_num < max_threads; thread_num++){
+        thread_list[thread_num].join();
+    }
+
+    /* thread t1(count_open_ports, start, end);
+    t1.join(); */
+
+    
 }
 
 int main(int argc, char* argv[]){
@@ -69,34 +76,31 @@ int main(int argc, char* argv[]){
         help();
         return 1;
     }
-    char flag;
     int c, start, end;
 
-    while((c = getopt(argc, argv, "supah")) != -1){
+    while((c = getopt(argc, argv, "vsupah")) != -1){
         switch (c){
+            case 'v':
+                verbose = true;
             case 's':
-                flag = c;
                 start = 0;
                 end = 1023;
-                init_threads(flag, start, end);
+                thread_handler(start, end);
                 break;
             case 'u':
-                flag = c;
                 start = 1024;
                 end = 49151;
-                init_threads(flag, start, end);
+                thread_handler(start, end);
                 break;
             case 'p':
-                flag = c;
                 start = 49152;
                 end = 65535;
-                init_threads(flag, start, end);
+                thread_handler(start, end);
                 break;
             case 'a':
-                flag = c;
                 start = 0;
                 end = 65535;
-                init_threads(flag, start, end);
+                thread_handler(start, end);
                 break;
             case 'h':
             default:
