@@ -1,7 +1,7 @@
-/* a multithreaded C program to check for open ports on Linux machines. */
+/* a multithreaded C program to check for open ports on Linux machines. 
+   i think it should also work on macOS and BSD systems if compiled with g++ for the thread library */
 
 #include "pscan.hpp"
-
 
 void help(){
     printf("Please specify a flag:\n"
@@ -18,7 +18,7 @@ void* count_open_ports(void* args){
     int end = pa->end;
     int sockfd = pa->sockfd;
     struct sockaddr_in* tower = pa->tower;
-    std::cout << start << std::endl;
+    printf("start: %d\n", start);
     pthread_exit(NULL);
 }
 
@@ -55,6 +55,7 @@ void init_threads(int flag, int start, int end){
     pa.tower = &tower;
     pa.sockfd = sockfd;
     pthread_create(&p, NULL, count_open_ports, (void*) &pa);
+    pthread_join(p, NULL);
     close(sockfd);
 }
 

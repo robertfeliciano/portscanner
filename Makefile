@@ -2,7 +2,7 @@ CXX=g++
 CPPFLAGS=-pthread -Wall
 
 all:
-	$(CXX) pscan.cpp -o pscan $(CPPFLAGS)
+	$(CXX) pscan.cpp -o ps $(CPPFLAGS)
 
 clean:
 	rm pscan
