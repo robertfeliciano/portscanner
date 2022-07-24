@@ -34,10 +34,6 @@ static unordered_map<int, string> ports = {
     {631, "This port is used for printer driver software so it is usually always on."},
 };
 
-vector<int> open_ports;
-static int arr_index = 0;
+static vector<int> open_ports;
 
-//i kind of wanted to use an atomic<int> for arr_index but since 
-// i'd have to use a mutex for the array anyway i decided not to
-
-static mutex tower_socket_mtx;
+static mutex vec_mtx;
