@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <mutex>
 #include <vector>
+#include <algorithm>
 
 using std::cout;
 using std::endl;
@@ -30,7 +31,7 @@ struct port_args {
 
 static bool verbose = false;
 
-static unordered_map<int, string> ports = {
+static unordered_map<int, string> port_map = {
     {631, "This port is used for printer driver software so it is usually always on."},
 };
 

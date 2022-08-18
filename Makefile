@@ -5,4 +5,4 @@ all:
 	$(CXX) pscan.cpp -o ps $(CPPFLAGS)
 
 clean:
-	rm pscan
+	rm ps

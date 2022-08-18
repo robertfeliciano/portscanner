@@ -46,14 +46,30 @@ void verbose_printer(char flag){
     return;
 }
 
+void print_ports(vector<int>& open_ports, int start, int end, char flag){
+	switch(flag){
+		case 's':
+			cout << "\033[1;34m===== Printing System Ports =====\033[0m\n";
+			for (int i : open_ports){
+                cout << "\033[1m" << i << "\033[0m" << " -> ";
+                if (port_map.find(i) != port_map.end()){
+                    cout << port_map[i] << "\n";
+                }
+                else{
+                    cout << "\n";
+                }
+			}
+	}
+}
+
 void thread_handler(int start, int end, char flag){
     int max_threads = thread::hardware_concurrency();
     thread thread_list[max_threads];
     int interval_size = (end - start + 1)/max_threads;
-    int thread_num = 0;
+    int thread_num;
 
     //create all the threads
-    for (; thread_num < max_threads; thread_num++){
+    for (thread_num = 0; thread_num < max_threads; thread_num++){
         int right_bound = start + interval_size;
         thread_list[thread_num] = thread(count_open_ports, start, right_bound);
         start = right_bound + 1;
@@ -63,9 +79,9 @@ void thread_handler(int start, int end, char flag){
         thread_list[thread_num].join();
     }
 
-    for (int port : open_ports){
-        cout << "port " << port << " is open\n";
-    }
+	sort(open_ports.begin(), open_ports.end());
+
+	print_ports(open_ports, start, end, flag);
 
     if (verbose){
         verbose_printer(flag);
