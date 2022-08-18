@@ -48,18 +48,24 @@ void verbose_printer(char flag){
 
 void print_ports(vector<int>& open_ports, int start, int end, char flag){
 	switch(flag){
-		case 's':
-			cout << "\033[1;34m===== Printing System Ports =====\033[0m\n";
-			for (int i : open_ports){
-                cout << "\033[1m" << i << "\033[0m" << " -> ";
+        case 's':
+            cout << "\033[1;34m===== Open System Ports =====\033[0m\n";
+            for (int i : open_ports){
+                cout << "\033[1m" << i << "\033[0m";
                 if (port_map.find(i) != port_map.end()){
-                    cout << port_map[i] << "\n";
+                    cout << " -> " << port_map[i] << "\n";   
                 }
                 else{
                     cout << "\n";
                 }
 			}
-	}
+        break;
+
+        default:
+            for (int i : open_ports){
+                cout << "\033[1m" << i << "\033[0m\n";
+            }
+	}   
 }
 
 void thread_handler(int start, int end, char flag){
