@@ -59,7 +59,7 @@ void print_ports(vector<int>& open_ports, int start, int end, char flag){
                     cout << "\n";
                 }
 			}
-        break;
+        	break;
 
         default:
             for (int i : open_ports){
